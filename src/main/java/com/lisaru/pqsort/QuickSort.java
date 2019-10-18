@@ -1,6 +1,14 @@
 package com.lisaru.pqsort;
 
 public class QuickSort {
+    public static void sort(int[] array, int start, int end) {
+        if (start < end) {
+            int pos = partition(array, start, end);
+            sort(array, start, pos);
+            sort(array, pos + 1, end);
+        }
+    }
+
     static int partition(int[] array, int start, int end) {
         int pivot = choosePivot(array, start, end);
         int i = start - 1;
@@ -19,13 +27,13 @@ public class QuickSort {
         }
     }
 
+    static int choosePivot(int[] array, int start, int end) {
+        return array[start];
+    }
+
     private static void swap(int[] array, int pos1, int pos2) {
         int aux = array[pos1];
         array[pos1] = array[pos2];
         array[pos2] = aux;
-    }
-
-    static int choosePivot(int[] array, int start, int end) {
-        return array[start];
     }
 }

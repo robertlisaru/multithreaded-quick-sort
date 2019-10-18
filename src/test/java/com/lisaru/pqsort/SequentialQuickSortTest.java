@@ -4,10 +4,9 @@ import org.junit.Test;
 
 import java.util.Random;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.*;
 
-public class QuickSortTest {
+public class SequentialQuickSortTest {
     @Test
     public void partitionOneElement() {
         int[] array = {5};
@@ -51,6 +50,29 @@ public class QuickSortTest {
         }
         for (int i = pos + 1; i < array.length; i++) {
             assertTrue("right side elements greater than or equal to pivot", array[i] >= pivot);
+        }
+    }
+
+    @Test
+    public void sortArray() {
+        int[] array = {30, 2, 5, 1, 3, 6, 8, 10, 21, 34, 33, 7, 7, 100};
+        QuickSort.sort(array, 0, array.length - 1);
+        for (int i = 0; i < array.length - 1; i++) {
+            assertTrue(array[i] <= array[i + 1]);
+        }
+    }
+
+    @Test
+    public void sortRandomArray() {
+        Random rand = new Random(System.currentTimeMillis());
+        int n = rand.nextInt(100);
+        int[] array = new int[n];
+        for (int i = 0; i < n; i++) {
+            array[i] = rand.nextInt(100);
+        }
+        QuickSort.sort(array, 0, array.length - 1);
+        for (int i = 0; i < array.length - 1; i++) {
+            assertTrue(array[i] <= array[i + 1]);
         }
     }
 }
