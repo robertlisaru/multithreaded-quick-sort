@@ -14,28 +14,10 @@ public class Main {
         return array;
     }
 
-    public static int[] generateTextbookExampleArray() {
-        int[] array = {
-                15, 46, 48, 93, 39, 6, 72, 91, 14,
-                36, 69, 40, 89, 61, 97, 12, 21, 54,
-                53, 97, 84, 58, 32, 27, 33, 72, 20
-        };
-        return array;
-    }
-
-    public static void printArray(int[] array) {
-        for (int i = 0; i < array.length; i++) {
-            System.out.print(array[i] + " ");
-        }
-        System.out.println();
-    }
-
     public static void main(String[] args) {
         MPI.Init(args);
         int worldRank = MPI.COMM_WORLD.Rank();
         int worldSize = MPI.COMM_WORLD.Size();
-
-        int debugRank = 2;
 
         int[] array = null;
         int[] localArraySizes = new int[worldSize];
@@ -44,8 +26,6 @@ public class Main {
         //region generate random array and scatter into local arrays
         if (worldRank == 0) {
             array = generateRandomArray(100, 1000);
-            System.out.println("Initial array: ");
-            printArray(array);
             if (worldSize == 1) {
                 QuickSort.sort(array, 0, array.length - 1);
                 MPI.Finalize();
@@ -74,15 +54,7 @@ public class Main {
 
         //endregion
 
-        if (worldRank == debugRank) {
-            System.out.println("Local array: ");
-            printArray(localArray);
-        }
         QuickSort.sort(localArray, 0, localArraySize - 1);
-        if (worldRank == debugRank) {
-            System.out.println("Sorted Local array: ");
-            printArray(localArray);
-        }
 
         //region take samples from the sorted local array and gather them in P0
         int samplingStride = localArraySize / worldSize;
@@ -94,11 +66,6 @@ public class Main {
         MPI.COMM_WORLD.Gather(localSamples, 0, worldSize, MPI.INT,
                 gatheredSamples, 0, worldSize, MPI.INT, 0);
         //endregion
-
-        if (worldRank == debugRank) {
-            System.out.println("My samples array: ");
-            printArray(localSamples);
-        }
 
         //region P0: sort samples, then choose and broadcast pivots
         if (worldRank == 0) {
@@ -113,11 +80,6 @@ public class Main {
         MPI.COMM_WORLD.Bcast(pivots, 0, worldSize - 1, MPI.INT, 0);
         //endregion
 
-        if (worldRank == debugRank) {
-            System.out.println("Pivots: ");
-            printArray(pivots);
-        }
-
         //region partition sorted local array using pivots
         int[] partitionOffsets = new int[worldSize];
         partitionOffsets[0] = 0;
@@ -131,25 +93,10 @@ public class Main {
         partitionSizes[worldSize - 1] = localArraySize - partitionOffsets[worldSize - 1];
         //endregion
 
-        if (worldRank == debugRank) {
-            System.out.println("Partition sizes: ");
-            printArray(partitionSizes);
-        }
-
-        if (worldRank == debugRank) {
-            System.out.println("Partition offsets: ");
-            printArray(partitionOffsets);
-        }
-
         //region gather partitions into corresponding processes
         int[] gatheredPartitionSizes = new int[worldSize];
         MPI.COMM_WORLD.Alltoall(partitionSizes, 0, 1, MPI.INT,
                 gatheredPartitionSizes, 0, 1, MPI.INT);
-
-        if (worldRank == debugRank) {
-            System.out.println("Gathered partition sizes: ");
-            printArray(gatheredPartitionSizes);
-        }
 
         int[] gatheredPartitionOffsets = new int[worldSize];
         int gatheredPartitionSizeTotal = 0;
@@ -161,11 +108,6 @@ public class Main {
         MPI.COMM_WORLD.Alltoallv(localArray, 0, partitionSizes, partitionOffsets, MPI.INT,
                 gatheredPartitions, 0, gatheredPartitionSizes, gatheredPartitionOffsets, MPI.INT);
         //endregion
-
-        if (worldRank == debugRank) {
-            System.out.println("Gathered partitions: ");
-            printArray(gatheredPartitions);
-        }
 
         //region merge the already sorted partitions using a min-heap
         HeapElement[] heapElements = new HeapElement[worldSize];
@@ -182,11 +124,6 @@ public class Main {
         int[] mergeResult = new int[gatheredPartitionSizeTotal];
         for (int i = 0; i < gatheredPartitionSizeTotal; i++) {
             mergeResult[i] = minHeap.popMin();
-        }
-
-        if (worldRank == debugRank) {
-            System.out.println("Merged partitions: ");
-            printArray(mergeResult);
         }
         //endregion
 
@@ -208,11 +145,6 @@ public class Main {
         MPI.COMM_WORLD.Gatherv(mergeResult, 0, mergeResult.length, MPI.INT,
                 array, 0, mergeResultSizes, mergeResultOffsets, MPI.INT, 0);
         //endregion
-
-        if (worldRank == 0) {
-            System.out.println("Sorted array: ");
-            printArray(array);
-        }
 
         MPI.Finalize();
     }
