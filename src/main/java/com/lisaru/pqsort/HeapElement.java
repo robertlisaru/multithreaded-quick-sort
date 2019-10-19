@@ -2,19 +2,27 @@ package com.lisaru.pqsort;
 
 public class HeapElement {
     private int[] sortedArray;
-    private int headPosition = 0;
-    private int length;
+    private int startPosition = 0;
+    private int endPosition;
 
     public HeapElement(int[] sortedArray) {
         this.sortedArray = sortedArray;
-        length = sortedArray.length;
+        endPosition = sortedArray.length;
+    }
+
+    public void setStartPosition(int offset) {
+        startPosition = offset;
+    }
+
+    public void setEndPosition(int endPosition) {
+        this.endPosition = endPosition;
     }
 
     public int key() {
-        return headPosition < length ? sortedArray[headPosition] : Integer.MAX_VALUE;
+        return startPosition < endPosition ? sortedArray[startPosition] : Integer.MAX_VALUE;
     }
 
     public int popFirst() {
-        return sortedArray[headPosition++];
+        return sortedArray[startPosition++];
     }
 }
