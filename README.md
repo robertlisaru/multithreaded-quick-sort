@@ -29,4 +29,4 @@ Cores: 2 	Avg_time:1.43
 Ratio: 70%
 ```
 
-Performance improvement is not proportional with the number of cores. It's less than that, because there is some overhead cost to splitting the array and the interprocess communication. But still a significant improvement.
+Performance improvement is not proportional with the number of cores. It's less than that, because there is some overhead cost to splitting the array and the interprocess communication, and core load balancing is not guaranteed to be even. But still a significant improvement.
